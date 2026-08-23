@@ -29,7 +29,7 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     final storedToken = prefs.getString('token');
     final storedRefreshToken = prefs.getString('refreshToken');
-    
+
     if (storedToken != null && storedToken.isNotEmpty) {
       token.value = storedToken;
       if (storedRefreshToken != null) {
@@ -39,7 +39,11 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> setCredentials(String newToken, String? newRefreshToken, Map userData) async {
+  Future<void> setCredentials(
+    String newToken,
+    String? newRefreshToken,
+    Map userData,
+  ) async {
     token.value = newToken;
     if (newRefreshToken != null) {
       refreshToken.value = newRefreshToken;
@@ -69,7 +73,7 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('refreshToken');
-    
+
     Get.offAllNamed('/login');
   }
 
@@ -79,22 +83,24 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
-      final response = await DioClient().dio.post(ApiConfig.login, data: {
-        'email': email,
-        'password': password,
-      });
+
+      final response = await DioClient().dio.post(
+        ApiConfig.login,
+        data: {'email': email, 'password': password},
+      );
 
       final responseData = response.data['data'] ?? response.data;
+      print('login-responseData==> $responseData');
       await setCredentials(
         responseData['accessToken'] ?? responseData['token'] ?? '',
         responseData['refreshToken'] ?? '',
         responseData['patient'] ?? responseData['user'] ?? {},
       );
-      
+
       Get.offAllNamed('/home');
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Login failed. Please try again.';
+      errorMessage.value =
+          e.response?.data?['message'] ?? 'Login failed. Please try again.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred during login.';
     } finally {
@@ -106,16 +112,17 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
-      await DioClient().dio.post(ApiConfig.register, data: {
-        'name': name,
-        'email': email,
-        'password': password,
-      });
-      
+
+      await DioClient().dio.post(
+        ApiConfig.register,
+        data: {'name': name, 'email': email, 'password': password},
+      );
+
       Get.toNamed('/verify-otp', arguments: {'email': email});
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Registration failed. Please try again.';
+      errorMessage.value =
+          e.response?.data?['message'] ??
+          'Registration failed. Please try again.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred during registration.';
     } finally {
@@ -128,15 +135,17 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       successMessage.value = '';
-      
-      await DioClient().dio.post(ApiConfig.verifyRegister, data: {
-        'email': email,
-        'otp': otp,
-      });
-      
+
+      await DioClient().dio.post(
+        ApiConfig.verifyRegister,
+        data: {'email': email, 'otp': otp},
+      );
+
       Get.offAllNamed('/login');
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Verification failed. Please check your OTP.';
+      errorMessage.value =
+          e.response?.data?['message'] ??
+          'Verification failed. Please check your OTP.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred during verification.';
     } finally {
@@ -149,14 +158,17 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       successMessage.value = '';
-      
-      final response = await DioClient().dio.post(ApiConfig.resendRegisterOtp, data: {
-        'email': email,
-      });
-      
-      successMessage.value = response.data['message'] ?? 'OTP sent successfully';
+
+      final response = await DioClient().dio.post(
+        ApiConfig.resendRegisterOtp,
+        data: {'email': email},
+      );
+
+      successMessage.value =
+          response.data['message'] ?? 'OTP sent successfully';
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Failed to resend OTP.';
+      errorMessage.value =
+          e.response?.data?['message'] ?? 'Failed to resend OTP.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred.';
     } finally {
@@ -169,15 +181,17 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
       successMessage.value = '';
-      
-      final response = await DioClient().dio.post(ApiConfig.forgotPassword, data: {
-        'email': email,
-      });
-      
+
+      final response = await DioClient().dio.post(
+        ApiConfig.forgotPassword,
+        data: {'email': email},
+      );
+
       successMessage.value = response.data['message'] ?? 'OTP sent to email';
       Get.toNamed('/reset-password', arguments: {'email': email});
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Failed to send OTP.';
+      errorMessage.value =
+          e.response?.data?['message'] ?? 'Failed to send OTP.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred.';
     } finally {
@@ -185,20 +199,24 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> resetPassword(String email, String otp, String newPassword) async {
+  Future<void> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+  ) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
-      await DioClient().dio.post(ApiConfig.resetPassword, data: {
-        'email': email,
-        'otp': otp,
-        'newPassword': newPassword,
-      });
-      
+
+      await DioClient().dio.post(
+        ApiConfig.resetPassword,
+        data: {'email': email, 'otp': otp, 'newPassword': newPassword},
+      );
+
       Get.offAllNamed('/login');
     } on DioException catch (e) {
-      errorMessage.value = e.response?.data?['message'] ?? 'Failed to reset password.';
+      errorMessage.value =
+          e.response?.data?['message'] ?? 'Failed to reset password.';
     } catch (e) {
       errorMessage.value = 'An unexpected error occurred.';
     } finally {
