@@ -7,6 +7,7 @@ type RootStackParamList = {
   Home: undefined;
   About: undefined;
   Contact: undefined;
+  TestCatalog: undefined;
 };
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -28,9 +29,17 @@ const HomeScreen = ({ navigation }: Props) => {
           <TouchableOpacity 
             style={styles.button} 
             activeOpacity={0.8}
+            onPress={() => navigation.navigate('TestCatalog')}
+          >
+            <Text style={styles.buttonText}>View Test Catalog</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.button, styles.secondaryButton]} 
+            activeOpacity={0.8}
             onPress={() => navigation.navigate('About')}
           >
-            <Text style={styles.buttonText}>About Us</Text>
+            <Text style={[styles.buttonText, styles.secondaryButtonText]}>About Us</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 

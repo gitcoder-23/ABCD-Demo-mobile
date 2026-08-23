@@ -29,7 +29,7 @@ const resetInterceptor = (token: string) => {
 rootApi.interceptors.request.use(
   config => {
     // Dynamically require store to prevent circular dependency
-    const store = require('../redux/store').store;
+    const store = require('../redux/store').default;
     const state = store.getState();
     const token = state.authApp.accessToken;
     if (token) {

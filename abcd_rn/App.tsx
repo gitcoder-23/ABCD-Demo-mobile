@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider, useSelector } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { store, RootState } from './src/app/redux/store';
+import { RootState } from './src/app/redux/store';
 
 // App Screens
 import SplashScreen from './src/screens/SplashScreen';
@@ -16,6 +16,10 @@ import RegisterScreen from './src/screens/auth/RegisterScreen';
 import VerifyOtpScreen from './src/screens/auth/VerifyOtpScreen';
 import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
+
+// Test Screens
+import TestCatalogScreen from './src/screens/test/TestCatalogScreen';
+import TestDetailScreen from './src/screens/test/TestDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +50,8 @@ const NavigationWrapper = () => {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
             <Stack.Screen name="Contact" component={ContactScreen} />
+            <Stack.Screen name="TestCatalog" component={TestCatalogScreen} />
+            <Stack.Screen name="TestDetail" component={TestDetailScreen} />
           </Stack.Group>
         ) : (
           // Auth Stack
@@ -69,11 +75,7 @@ const NavigationWrapper = () => {
 };
 
 function App(): React.JSX.Element {
-  return (
-    <Provider store={store}>
-      <NavigationWrapper />
-    </Provider>
-  );
+  return <NavigationWrapper />;
 }
 
 export default App;
