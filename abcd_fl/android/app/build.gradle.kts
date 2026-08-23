@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.abcd_fl"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -41,4 +41,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.facebook.react:react-android:0.87.0")
+    implementation("com.facebook.hermes:hermes-android:250829098.0.16")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 }

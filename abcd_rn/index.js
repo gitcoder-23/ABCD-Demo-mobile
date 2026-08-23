@@ -10,12 +10,12 @@ import store, { persistor } from './src/app/redux/store';
 import { name as appName } from './app.json';
 
 // AppRegistry.registerComponent(appName, () => App);
-const ABCDRN = () => {
+const ABCDRN = (props) => {
   return (
     <>
       <Provider store={store}>
         <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-          <App />
+          <App {...props} />
         </PersistGate>
       </Provider>
     </>

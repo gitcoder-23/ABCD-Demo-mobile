@@ -2,6 +2,12 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = rootProject.file("../../abcd_rn/node_modules/react-native/android").toURI()
+        }
+        maven {
+            url = rootProject.file("../../abcd_rn/node_modules/jsc-android/dist").toURI()
+        }
     }
 }
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Provider, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { Provider, useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootState } from './src/app/redux/store';
@@ -20,6 +20,7 @@ import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
 // Test Screens
 import TestCatalogScreen from './src/screens/test/TestCatalogScreen';
 import TestDetailScreen from './src/screens/test/TestDetailScreen';
+import { setLogin } from './src/app/redux/slices/authAppSlice';
 
 const Stack = createNativeStackNavigator();
 
@@ -74,7 +75,15 @@ const NavigationWrapper = () => {
   );
 };
 
-function App(): React.JSX.Element {
+function App({ token }: { token?: string }): React.JSX.Element {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (token) {
+      dispatch(setLogin({ token }));
+    }
+  }, [token, dispatch]);
+
   return <NavigationWrapper />;
 }
 

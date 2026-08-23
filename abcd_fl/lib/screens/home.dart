@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -68,6 +71,33 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   'About Us',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    final authController = Get.find<AuthController>();
+                    final token = authController.token.value;
+                    const platform = MethodChannel('com.abcd/rn_bridge');
+                    await platform.invokeMethod('launchReactNativeTests', {'token': token});
+                  } on PlatformException catch (e) {
+                    debugPrint("Failed to invoke: '${e.message}'.");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF5A623), // Gold/Amber
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  shadowColor: const Color(0xFFF5A623).withOpacity(0.4),
+                ),
+                child: const Text(
+                  'Tests (React Native)',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
               ),

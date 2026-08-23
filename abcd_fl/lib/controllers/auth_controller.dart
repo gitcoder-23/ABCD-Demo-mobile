@@ -8,7 +8,7 @@ class AuthController extends GetxController {
   var isAuthenticated = false.obs;
   var token = ''.obs;
   var refreshToken = ''.obs;
-  var user = {}.obs;
+  RxMap<String, dynamic> user = <String, dynamic>{}.obs;
 
   var isLoading = false.obs;
   var errorMessage = ''.obs;
@@ -42,7 +42,7 @@ class AuthController extends GetxController {
   Future<void> setCredentials(
     String newToken,
     String? newRefreshToken,
-    Map userData,
+    Map<String, dynamic> userData,
   ) async {
     token.value = newToken;
     if (newRefreshToken != null) {
@@ -94,7 +94,7 @@ class AuthController extends GetxController {
       await setCredentials(
         responseData['accessToken'] ?? responseData['token'] ?? '',
         responseData['refreshToken'] ?? '',
-        responseData['patient'] ?? responseData['user'] ?? {},
+        (responseData['patient'] ?? responseData['user'] ?? {}) as Map<String, dynamic>,
       );
 
       Get.offAllNamed('/home');
