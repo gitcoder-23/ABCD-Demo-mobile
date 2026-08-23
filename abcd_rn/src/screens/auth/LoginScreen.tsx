@@ -1,32 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../app/redux/slices/authAppSlice';
-import rootApi from '../../app/api/rootApi';
-import { loginApi } from '../../app/api/config';
+import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
+import { LoginAction } from '../../app/redux/actions/authAction';
 import { authStyles as styles } from './styles';
 
 const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const { isLoginLoading, isError, errorMessage } = useAppSelector(state => state.authApp);
 
   const handleLogin = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await rootApi.post(loginApi, { email, password });
-      
-      const { token, refreshToken, user } = response.data;
-      dispatch(setCredentials({ token, refreshToken, user }));
-      // Navigation will be handled automatically by the App navigator
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    dispatch(LoginAction({ email, password }));
   };
 
   return (
@@ -36,7 +21,7 @@ const LoginScreen = ({ navigation }: any) => {
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
           
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {isError && errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <View style={styles.formGroup}>
             <TextInput 
@@ -58,8 +43,8 @@ const LoginScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Login</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoginLoading}>
+            {isLoginLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Login</Text>}
           </TouchableOpacity>
           
           <TouchableOpacity 
