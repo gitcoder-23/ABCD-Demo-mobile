@@ -1,0 +1,19 @@
+# General
+.DS_Store
+
+# React Native
+abcd_rn/node_modules/
+abcd_rn/android/app/build/
+abcd_rn/ios/Pods/
+abcd_rn/ios/build/
+abcd_rn/vendor/
+
+# Flutter
+abcd_fl/.dart_tool/
+abcd_fl/build/
+abcd_fl/.pub-cache/
+abcd_fl/.pub/
+abcd_fl/.fvm/
+
+# Ignore node_modules globally just in case
+node_modules/
