@@ -16,6 +16,7 @@ import RegisterScreen from './src/screens/auth/RegisterScreen';
 import VerifyOtpScreen from './src/screens/auth/VerifyOtpScreen';
 import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
+import { ActivityIndicator } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,7 +24,7 @@ const screenOptions = {
   headerStyle: { backgroundColor: '#B71234' },
   headerTintColor: '#FFFFFF',
   headerTitleStyle: { fontWeight: 'bold' as const },
-  contentStyle: { backgroundColor: '#F8F9FA' }
+  contentStyle: { backgroundColor: '#F8F9FA' },
 };
 
 const NavigationWrapper = () => {
@@ -34,8 +35,12 @@ const NavigationWrapper = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Splash" screenOptions={screenOptions}>
         {/* Splash screen is shown initially */}
-        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-        
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
+
         {isAuthenticated ? (
           // App Stack
           <Stack.Group>
@@ -49,8 +54,14 @@ const NavigationWrapper = () => {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
+            />
           </Stack.Group>
         )}
       </Stack.Navigator>
