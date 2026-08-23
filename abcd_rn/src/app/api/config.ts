@@ -13,3 +13,16 @@ export const resetPasswordApi = '/auth/reset-password';
 
 // User Endpoints
 export const userInfoApi = '/profile';
+
+export const testCatalogList = (
+  limit: number,
+  page: number,
+  search: string,
+  maxPrice: any,
+  minPrice: any,
+  categoryId: any,
+  query: string = '',
+) =>
+  `/catalog/tests?limit=${limit}&page=${page}&search=${search}&maxPrice=${maxPrice}&minPrice=${minPrice}&categoryId=${categoryId}&q=${query}`;
+
+export const testDetailApi = (testId: string) => `/catalog/tests/${testId}`;
