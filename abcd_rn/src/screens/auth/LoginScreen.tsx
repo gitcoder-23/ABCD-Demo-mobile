@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
 import { LoginAction } from '../../app/redux/actions/authAction';
 import { authStyles as styles } from './styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useAppDispatch();
-  const { isLoginLoading, isError, errorMessage } = useAppSelector(state => state.authApp);
+  const { isLoginLoading, isError, errorMessage } = useAppSelector(
+    state => state.authApp,
+  );
 
   const handleLogin = async () => {
     dispatch(LoginAction({ email, password }));
@@ -21,13 +30,15 @@ const LoginScreen = ({ navigation }: any) => {
         <View style={styles.card}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
-          
-          {isError && errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
+          {isError && errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
 
           <View style={styles.formGroup}>
-            <TextInput 
-              style={styles.input} 
-              placeholder="Email" 
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -35,40 +46,52 @@ const LoginScreen = ({ navigation }: any) => {
               placeholderTextColor="#999"
             />
             <View style={styles.passwordContainer}>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Password" 
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!isPasswordVisible}
                 placeholderTextColor="#999"
               />
-              <TouchableOpacity 
-                style={styles.eyeIcon} 
+              <TouchableOpacity
+                style={styles.eyeIcon}
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
-                <Text style={{ fontSize: 18 }}>{isPasswordVisible ? '👁️' : '👁️‍🗨️'}</Text>
+                <Text style={{ fontSize: 18 }}>
+                  {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoginLoading}>
-            {isLoginLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Login</Text>}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={isLoginLoading}
+          >
+            {isLoginLoading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.linkButton} 
+
+          <TouchableOpacity
+            style={styles.linkButton}
             onPress={() => navigation.navigate('ForgotPassword')}
           >
             <Text style={styles.linkText}>Forgot Password?</Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
-          style={styles.linkButton} 
+        <TouchableOpacity
+          style={styles.linkButton}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={{color: '#666'}}>Don't have an account? <Text style={styles.linkText}>Register</Text></Text>
+          <Text style={{ color: '#666' }}>
+            Don't have an account? <Text style={styles.linkText}>Register</Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

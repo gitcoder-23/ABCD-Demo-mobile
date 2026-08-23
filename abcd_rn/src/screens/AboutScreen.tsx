@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AboutScreen = ({ navigation }: any) => {
   return (
@@ -11,12 +12,13 @@ const AboutScreen = ({ navigation }: any) => {
           </View>
           <Text style={styles.title}>Aditya Birla</Text>
           <Text style={styles.description}>
-            A premium global conglomerate, anchored by an extraordinary force of employees, building a legacy of excellence and trust.
+            A premium global conglomerate, anchored by an extraordinary force of
+            employees, building a legacy of excellence and trust.
           </Text>
         </View>
 
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           activeOpacity={0.8}
           onPress={() => navigation.goBack()}
         >
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
     color: '#B71234',
     fontSize: 16,
     fontWeight: '600',
-  }
+  },
 });
 
 export default AboutScreen;
