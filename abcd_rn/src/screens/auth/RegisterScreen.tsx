@@ -8,6 +8,7 @@ const RegisterScreen = ({ navigation }: any) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const dispatch = useAppDispatch();
   const { isRegisterLoading, registerError } = useAppSelector(state => state.authApp);
 
@@ -46,14 +47,22 @@ const RegisterScreen = ({ navigation }: any) => {
               keyboardType="email-address"
               placeholderTextColor="#999"
             />
-            <TextInput 
-              style={styles.input} 
-              placeholder="Password" 
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput 
+                style={styles.input} 
+                placeholder="Password" 
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible}
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon} 
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+              >
+                <Text style={{ fontSize: 18 }}>{isPasswordVisible ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isRegisterLoading}>

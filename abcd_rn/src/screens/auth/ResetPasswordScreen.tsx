@@ -9,6 +9,8 @@ const ResetPasswordScreen = ({ route, navigation }: any) => {
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const dispatch = useAppDispatch();
   const { isResetPasswordLoading, resetPasswordError } = useAppSelector(state => state.authApp);
 
@@ -45,22 +47,38 @@ const ResetPasswordScreen = ({ route, navigation }: any) => {
               keyboardType="number-pad"
               placeholderTextColor="#999"
             />
-            <TextInput 
-              style={styles.input} 
-              placeholder="New Password" 
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
-            <TextInput 
-              style={styles.input} 
-              placeholder="Confirm Password" 
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              placeholderTextColor="#999"
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput 
+                style={styles.input} 
+                placeholder="New Password" 
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry={!isPasswordVisible}
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon} 
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+              >
+                <Text style={{ fontSize: 18 }}>{isPasswordVisible ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.passwordContainer}>
+              <TextInput 
+                style={styles.input} 
+                placeholder="Confirm Password" 
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!isConfirmPasswordVisible}
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity 
+                style={styles.eyeIcon} 
+                onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+              >
+                <Text style={{ fontSize: 18 }}>{isConfirmPasswordVisible ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleResetPassword} disabled={isResetPasswordLoading}>

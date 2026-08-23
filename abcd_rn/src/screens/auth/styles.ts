@@ -45,6 +45,15 @@ export const authStyles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
   },
+  passwordContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    padding: 4,
+  },
   button: {
     backgroundColor: '#B71234',
     paddingVertical: 16,

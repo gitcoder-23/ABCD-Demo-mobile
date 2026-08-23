@@ -16,7 +16,6 @@ import RegisterScreen from './src/screens/auth/RegisterScreen';
 import VerifyOtpScreen from './src/screens/auth/VerifyOtpScreen';
 import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/auth/ResetPasswordScreen';
-import { ActivityIndicator } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
