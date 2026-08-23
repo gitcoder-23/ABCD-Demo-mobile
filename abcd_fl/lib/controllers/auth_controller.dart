@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import '../api/dio_client.dart';
+import '../api/config.dart';
 
 class AuthController extends GetxController {
   var isAuthenticated = false.obs;
@@ -7,10 +10,26 @@ class AuthController extends GetxController {
   var refreshToken = ''.obs;
   var user = {}.obs;
 
+  var isLoading = false.obs;
+  var errorMessage = ''.obs;
+  var successMessage = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
     _loadStoredData();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    ever(isAuthenticated, (bool authenticated) {
+      if (authenticated) {
+        Get.offAllNamed('/home');
+      } else {
+        Get.offAllNamed('/login');
+      }
+    });
   }
 
   Future<void> _loadStoredData() async {
@@ -58,6 +77,124 @@ class AuthController extends GetxController {
     await prefs.remove('token');
     await prefs.remove('refreshToken');
     
-    Get.offAllNamed('/login');
+    // routing handled by `ever` listener
+  }
+
+  // --- API Methods ---
+
+  Future<void> login(String email, String password) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      final response = await DioClient().dio.post(ApiConfig.login, data: {
+        'email': email,
+        'password': password,
+      });
+
+      await setCredentials(
+        response.data['token'],
+        response.data['refreshToken'],
+        response.data['user'] ?? {},
+      );
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Login failed. Please try again.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> register(String name, String email, String password) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      await DioClient().dio.post(ApiConfig.register, data: {
+        'name': name,
+        'email': email,
+        'password': password,
+      });
+      
+      Get.toNamed('/verify-otp', arguments: {'email': email});
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Registration failed. Please try again.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> verifyOtp(String email, String otp) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      successMessage.value = '';
+      
+      await DioClient().dio.post(ApiConfig.verifyRegister, data: {
+        'email': email,
+        'otp': otp,
+      });
+      
+      Get.offAllNamed('/login');
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Verification failed. Please check your OTP.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> resendOtp(String email) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      successMessage.value = '';
+      
+      final response = await DioClient().dio.post(ApiConfig.resendRegisterOtp, data: {
+        'email': email,
+      });
+      
+      successMessage.value = response.data['message'] ?? 'OTP sent successfully';
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Failed to resend OTP.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      successMessage.value = '';
+      
+      final response = await DioClient().dio.post(ApiConfig.forgotPassword, data: {
+        'email': email,
+      });
+      
+      successMessage.value = response.data['message'] ?? 'OTP sent to email';
+      Get.toNamed('/reset-password', arguments: {'email': email});
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Failed to send OTP.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> resetPassword(String email, String otp, String newPassword) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      await DioClient().dio.post(ApiConfig.resetPassword, data: {
+        'email': email,
+        'otp': otp,
+        'newPassword': newPassword,
+      });
+      
+      Get.offAllNamed('/login');
+    } on DioException catch (e) {
+      errorMessage.value = e.response?.data?['message'] ?? 'Failed to reset password.';
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

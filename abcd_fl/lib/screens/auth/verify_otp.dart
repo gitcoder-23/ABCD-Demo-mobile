@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../api/dio_client.dart';
-import '../../api/config.dart';
-import 'package:dio/dio.dart';
+import '../../controllers/auth_controller.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
   const VerifyOtpScreen({super.key});
@@ -13,10 +11,8 @@ class VerifyOtpScreen extends StatefulWidget {
 
 class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   final _otpController = TextEditingController();
-  bool _isLoading = false;
-  String _error = '';
-  String _message = '';
-  String _email = '';
+  late String _email;
+  final authController = Get.find<AuthController>();
 
   @override
   void initState() {
@@ -25,52 +21,13 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   }
 
   Future<void> _handleVerify() async {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-      _message = '';
-    });
-
-    try {
-      await DioClient().dio.post(ApiConfig.verifyRegister, data: {
-        'email': _email,
-        'otp': _otpController.text,
-      });
-      Get.offAllNamed('/login');
-    } on DioException catch (e) {
-      setState(() {
-        _error = e.response?.data?['message'] ?? 'Verification failed. Please check your OTP.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    FocusScope.of(context).unfocus();
+    await authController.verifyOtp(_email, _otpController.text);
   }
 
   Future<void> _handleResend() async {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-      _message = '';
-    });
-
-    try {
-      await DioClient().dio.post(ApiConfig.resendRegisterOtp, data: {
-        'email': _email,
-      });
-      setState(() {
-        _message = 'OTP has been resent to your email.';
-      });
-    } on DioException catch (e) {
-      setState(() {
-        _error = e.response?.data?['message'] ?? 'Failed to resend OTP.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    FocusScope.of(context).unfocus();
+    await authController.resendOtp(_email);
   }
 
   @override
@@ -98,8 +55,18 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                       const SizedBox(height: 8),
                       Text('Enter the OTP sent to $_email', style: const TextStyle(color: Color(0xFF666666))),
                       const SizedBox(height: 24),
-                      if (_error.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 16), child: Text(_error, style: const TextStyle(color: Colors.red))),
-                      if (_message.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 16), child: Text(_message, style: const TextStyle(color: Colors.green))),
+                      Obx(() => authController.errorMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(authController.errorMessage.value, style: const TextStyle(color: Colors.red)),
+                            )
+                          : const SizedBox.shrink()),
+                      Obx(() => authController.successMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(authController.successMessage.value, style: const TextStyle(color: Colors.green)),
+                            )
+                          : const SizedBox.shrink()),
                       TextField(
                         controller: _otpController,
                         keyboardType: TextInputType.number,
@@ -115,25 +82,25 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleVerify,
+                        child: Obx(() => ElevatedButton(
+                          onPressed: authController.isLoading.value ? null : _handleVerify,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFB71234),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: _isLoading 
+                          child: authController.isLoading.value 
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
                             : const Text('Verify OTP', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                       ),
                       const SizedBox(height: 10),
                       Center(
-                        child: TextButton(
-                          onPressed: _isLoading ? null : _handleResend,
+                        child: Obx(() => TextButton(
+                          onPressed: authController.isLoading.value ? null : _handleResend,
                           child: const Text('Resend OTP', style: TextStyle(color: Color(0xFFB71234))),
-                        ),
+                        )),
                       )
                     ],
                   ),

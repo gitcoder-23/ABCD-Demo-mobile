@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../api/dio_client.dart';
-import '../../api/config.dart';
-import 'package:dio/dio.dart';
+import '../../controllers/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,34 +13,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String _error = '';
   bool _isPasswordVisible = false;
+  final authController = Get.find<AuthController>();
 
   Future<void> _handleRegister() async {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-    });
-
-    try {
-      await DioClient().dio.post(ApiConfig.register, data: {
-        'name': _nameController.text,
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      });
-      
-      Get.toNamed('/verify-otp', arguments: {'email': _emailController.text});
-    } on DioException catch (e) {
-      setState(() {
-        _error = e.response?.data?['message'] ?? 'Registration failed. Please try again.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    FocusScope.of(context).unfocus();
+    await authController.register(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +61,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       const Text('Sign up to get started', style: TextStyle(color: Color(0xFF666666))),
                       const SizedBox(height: 24),
-                      if (_error.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Text(_error, style: const TextStyle(color: Colors.red)),
-                        ),
-                      _buildTextField(_nameController, 'Full Name'),
+                      Obx(() => authController.errorMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(authController.errorMessage.value, style: const TextStyle(color: Colors.red)),
+                            )
+                          : const SizedBox.shrink()),
+                      _buildTextField(_nameController, 'Full Name', TextInputType.name),
                       const SizedBox(height: 16),
                       _buildTextField(_emailController, 'Email', TextInputType.emailAddress),
                       const SizedBox(height: 16),
@@ -91,18 +75,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleRegister,
+                        child: Obx(() => ElevatedButton(
+                          onPressed: authController.isLoading.value ? null : _handleRegister,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFB71234),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: _isLoading 
+                          child: authController.isLoading.value 
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
                             : const Text('Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                       ),
                     ],
                   ),

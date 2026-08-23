@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../api/dio_client.dart';
-import '../../api/config.dart';
-import 'package:dio/dio.dart';
+import '../../controllers/auth_controller.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -14,11 +12,9 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _otpController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String _error = '';
-  String _message = '';
-  String _email = '';
+  late String _email;
   bool _isPasswordVisible = false;
+  final authController = Get.find<AuthController>();
 
   @override
   void initState() {
@@ -27,33 +23,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Future<void> _handleReset() async {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-      _message = '';
-    });
-
-    try {
-      await DioClient().dio.post(ApiConfig.resetPassword, data: {
-        'email': _email,
-        'otp': _otpController.text,
-        'newPassword': _passwordController.text,
-      });
-      setState(() {
-        _message = 'Password reset successful. Please login.';
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.offAllNamed('/login');
-      });
-    } on DioException catch (e) {
-      setState(() {
-        _error = e.response?.data?['message'] ?? 'Failed to reset password. Check your code.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    FocusScope.of(context).unfocus();
+    await authController.resetPassword(
+      _email,
+      _otpController.text,
+      _passwordController.text,
+    );
   }
 
   @override
@@ -81,8 +56,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       const SizedBox(height: 8),
                       Text('Enter the code sent to $_email', style: const TextStyle(color: Color(0xFF666666))),
                       const SizedBox(height: 24),
-                      if (_error.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 16), child: Text(_error, style: const TextStyle(color: Colors.red))),
-                      if (_message.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 16), child: Text(_message, style: const TextStyle(color: Colors.green))),
+                      Obx(() => authController.errorMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(authController.errorMessage.value, style: const TextStyle(color: Colors.red)),
+                            )
+                          : const SizedBox.shrink()),
+                      Obx(() => authController.successMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Text(authController.successMessage.value, style: const TextStyle(color: Colors.green)),
+                            )
+                          : const SizedBox.shrink()),
                       TextField(
                         controller: _otpController,
                         keyboardType: TextInputType.number,
@@ -122,18 +107,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleReset,
+                        child: Obx(() => ElevatedButton(
+                          onPressed: authController.isLoading.value ? null : _handleReset,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFB71234),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: _isLoading 
+                          child: authController.isLoading.value 
                             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
                             : const Text('Reset Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
+                        )),
                       ),
                     ],
                   ),
