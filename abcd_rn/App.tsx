@@ -27,7 +27,8 @@ const screenOptions = {
 };
 
 const NavigationWrapper = () => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.authApp);
+  const { accessToken } = useSelector((state: RootState) => state.authApp);
+  const isAuthenticated = !!accessToken;
 
   return (
     <NavigationContainer>
