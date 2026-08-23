@@ -1,42 +1,30 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import rootApi from '../../app/api/rootApi';
-import { verifyRegisterApi, resendRegisterOtpApi } from '../../app/api/config';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
+import { VerifyRegisterAction, ResendRegisterOtpAction } from '../../app/redux/actions/authAction';
 import { authStyles as styles } from './styles';
 
 const VerifyOtpScreen = ({ route, navigation }: any) => {
   const email = route.params?.email || '';
   const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const dispatch = useAppDispatch();
+  const { isVerifyLoading, verifyError, isResendOtpLoading } = useAppSelector(state => state.authApp);
 
   const handleVerify = async () => {
     try {
-      setLoading(true);
-      setError('');
-      setMessage('');
-      await rootApi.post(verifyRegisterApi, { email, otp });
-      // Successfully verified, navigate to login
-      navigation.navigate('Login');
+      await dispatch(VerifyRegisterAction({ email, code: otp })).unwrap();
+      // Navigation to Home handled automatically by App navigator checking accessToken
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Verification failed. Please check your OTP.');
-    } finally {
-      setLoading(false);
+      // Error is handled by Redux state
     }
   };
 
-  const handleResend = async () => {
+  const handleResendOtp = async () => {
     try {
-      setLoading(true);
-      setError('');
-      setMessage('');
-      await rootApi.post(resendRegisterOtpApi, { email });
-      setMessage('OTP has been resent to your email.');
+      await dispatch(ResendRegisterOtpAction({ email })).unwrap();
+      Alert.alert('Success', 'A new OTP has been sent to your email.');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to resend OTP.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Error', err.message || 'Failed to resend OTP. Please try again.');
     }
   };
 
@@ -47,8 +35,7 @@ const VerifyOtpScreen = ({ route, navigation }: any) => {
           <Text style={styles.title}>Verify Email</Text>
           <Text style={styles.subtitle}>Enter the OTP sent to {email}</Text>
           
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          {message ? <Text style={{color: 'green', marginBottom: 10}}>{message}</Text> : null}
+          {verifyError ? <Text style={styles.errorText}>{verifyError}</Text> : null}
 
           <View style={styles.formGroup}>
             <TextInput 
@@ -61,16 +48,20 @@ const VerifyOtpScreen = ({ route, navigation }: any) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Verify OTP</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={isVerifyLoading}>
+            {isVerifyLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Verify</Text>}
           </TouchableOpacity>
-
+          
           <TouchableOpacity 
-            style={[styles.linkButton, {marginTop: 10}]} 
-            onPress={handleResend}
-            disabled={loading}
+            style={[styles.linkButton, { marginTop: 16 }]} 
+            onPress={handleResendOtp} 
+            disabled={isResendOtpLoading}
           >
-            <Text style={styles.linkText}>Resend OTP</Text>
+            {isResendOtpLoading ? (
+              <ActivityIndicator color="#000" /> 
+            ) : (
+              <Text style={styles.linkText}>Resend OTP</Text>
+            )}
           </TouchableOpacity>
         </View>
         <TouchableOpacity 

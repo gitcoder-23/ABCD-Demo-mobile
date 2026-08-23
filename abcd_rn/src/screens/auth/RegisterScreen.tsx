@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import rootApi from '../../app/api/rootApi';
-import { registerApi } from '../../app/api/config';
+import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
+import { RegisterAction } from '../../app/redux/actions/authAction';
 import { authStyles as styles } from './styles';
 
 const RegisterScreen = ({ navigation }: any) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const dispatch = useAppDispatch();
+  const { isRegisterLoading, registerError } = useAppSelector(state => state.authApp);
 
   const handleRegister = async () => {
     try {
-      setLoading(true);
-      setError('');
-      await rootApi.post(registerApi, { name, email, password });
+      await dispatch(RegisterAction({ name, email, password })).unwrap();
       navigation.navigate('VerifyOtp', { email });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+      // Error is also handled by Redux state
     }
   };
 
@@ -31,7 +27,7 @@ const RegisterScreen = ({ navigation }: any) => {
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Sign up to get started</Text>
           
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {registerError ? <Text style={styles.errorText}>{registerError}</Text> : null}
 
           <View style={styles.formGroup}>
             <TextInput 
@@ -60,8 +56,8 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Register</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={isRegisterLoading}>
+            {isRegisterLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Register</Text>}
           </TouchableOpacity>
         </View>
 

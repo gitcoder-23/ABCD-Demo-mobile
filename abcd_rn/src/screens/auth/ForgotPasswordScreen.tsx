@@ -1,27 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import rootApi from '../../app/api/rootApi';
-import { forgotPasswordApi } from '../../app/api/config';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
+import { ForgotPasswordAction } from '../../app/redux/actions/authAction';
 import { authStyles as styles } from './styles';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const dispatch = useAppDispatch();
+  const { isForgotPasswordLoading, forgotPasswordError } = useAppSelector(state => state.authApp);
 
   const handleForgotPassword = async () => {
     try {
-      setLoading(true);
-      setError('');
-      setMessage('');
-      await rootApi.post(forgotPasswordApi, { email });
-      // Navigate to Reset Password and pass email
+      await dispatch(ForgotPasswordAction({ email })).unwrap();
+      Alert.alert('Success', 'Reset instructions sent to your email.');
       navigation.navigate('ResetPassword', { email });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Request failed. Please try again.');
-    } finally {
-      setLoading(false);
+      // Error handled by redux
     }
   };
 
@@ -30,10 +24,9 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.title}>Forgot Password</Text>
-          <Text style={styles.subtitle}>Enter your email to receive a reset code</Text>
+          <Text style={styles.subtitle}>Enter your email to reset your password</Text>
           
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          {message ? <Text style={{color: 'green', marginBottom: 10}}>{message}</Text> : null}
+          {forgotPasswordError ? <Text style={styles.errorText}>{forgotPasswordError}</Text> : null}
 
           <View style={styles.formGroup}>
             <TextInput 
@@ -47,8 +40,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleForgotPassword} disabled={loading}>
-            {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Send Code</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleForgotPassword} disabled={isForgotPasswordLoading}>
+            {isForgotPasswordLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Send Reset Link</Text>}
           </TouchableOpacity>
         </View>
         <TouchableOpacity 
