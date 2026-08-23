@@ -23,13 +23,6 @@ class AuthController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    ever(isAuthenticated, (bool authenticated) {
-      if (authenticated) {
-        Get.offAllNamed('/home');
-      } else {
-        Get.offAllNamed('/login');
-      }
-    });
   }
 
   Future<void> _loadStoredData() async {
@@ -77,7 +70,7 @@ class AuthController extends GetxController {
     await prefs.remove('token');
     await prefs.remove('refreshToken');
     
-    // routing handled by `ever` listener
+    Get.offAllNamed('/login');
   }
 
   // --- API Methods ---
@@ -92,13 +85,18 @@ class AuthController extends GetxController {
         'password': password,
       });
 
+      final responseData = response.data['data'] ?? response.data;
       await setCredentials(
-        response.data['token'],
-        response.data['refreshToken'],
-        response.data['user'] ?? {},
+        responseData['accessToken'] ?? responseData['token'] ?? '',
+        responseData['refreshToken'] ?? '',
+        responseData['patient'] ?? responseData['user'] ?? {},
       );
+      
+      Get.offAllNamed('/home');
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Login failed. Please try again.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred during login.';
     } finally {
       isLoading.value = false;
     }
@@ -118,6 +116,8 @@ class AuthController extends GetxController {
       Get.toNamed('/verify-otp', arguments: {'email': email});
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Registration failed. Please try again.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred during registration.';
     } finally {
       isLoading.value = false;
     }
@@ -137,6 +137,8 @@ class AuthController extends GetxController {
       Get.offAllNamed('/login');
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Verification failed. Please check your OTP.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred during verification.';
     } finally {
       isLoading.value = false;
     }
@@ -155,6 +157,8 @@ class AuthController extends GetxController {
       successMessage.value = response.data['message'] ?? 'OTP sent successfully';
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Failed to resend OTP.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred.';
     } finally {
       isLoading.value = false;
     }
@@ -174,6 +178,8 @@ class AuthController extends GetxController {
       Get.toNamed('/reset-password', arguments: {'email': email});
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Failed to send OTP.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred.';
     } finally {
       isLoading.value = false;
     }
@@ -193,6 +199,8 @@ class AuthController extends GetxController {
       Get.offAllNamed('/login');
     } on DioException catch (e) {
       errorMessage.value = e.response?.data?['message'] ?? 'Failed to reset password.';
+    } catch (e) {
+      errorMessage.value = 'An unexpected error occurred.';
     } finally {
       isLoading.value = false;
     }
