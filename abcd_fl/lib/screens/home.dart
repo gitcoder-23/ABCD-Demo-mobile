@@ -90,6 +90,25 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
               ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: () {
+                  // Action for All Tests (Native)
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFB71234),
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Color(0xFFB71234), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'All Tests (Native)',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                ),
+              ),
             ],
           ),
         ),
