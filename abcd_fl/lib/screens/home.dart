@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  static const platform = MethodChannel('com.example.abcd_fl/native_tests');
+
+  Future<void> _openNativeTests(BuildContext context) async {
+    try {
+      await platform.invokeMethod('openNativeTests');
+    } on PlatformException catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to open native tests: ${e.message}')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +107,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               OutlinedButton(
-                onPressed: () {
-                  // Action for All Tests (Native)
-                },
+                onPressed: () => _openNativeTests(context),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFB71234),
                   backgroundColor: Colors.white,
@@ -116,3 +129,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+

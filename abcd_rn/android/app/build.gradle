@@ -117,3 +117,60 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+task createJar(type: Jar, dependsOn: 'compileReleaseJavaWithJavac') {
+    archiveFileName = "classes.jar"
+    destinationDirectory = file("${project.buildDir}/intermediates/aar_classes")
+    from fileTree(dir: "${project.buildDir}/intermediates/javac/release/compileReleaseJavaWithJavac/classes")
+    from fileTree(dir: "${project.buildDir}/tmp/kotlin-classes/release")
+}
+
+task generateAar(type: Zip, dependsOn: ['assembleRelease', 'createJar']) {
+    description = "Generates a complete AAR archive for abcd_rn for embedding into host apps"
+    group = "build"
+    archiveFileName = "abcd_rn-release.aar"
+    destinationDirectory = file("${rootDir}/outputs/aar")
+
+    from("${project.projectDir}/src/main/AndroidManifest-library.xml") {
+        into ""
+        rename { "AndroidManifest.xml" }
+    }
+    from("${project.buildDir}/intermediates/aar_classes/classes.jar") {
+        into ""
+    }
+    from("${project.buildDir}/intermediates/runtime_symbol_list/release/processReleaseResources/R.txt") {
+        into ""
+    }
+    from("${project.buildDir}/intermediates/assets/release/mergeReleaseAssets") {
+        into "assets"
+    }
+    from("${project.projectDir}/src/main/res") {
+        into "res"
+    }
+    from("${project.buildDir}/intermediates/stripped_native_libs/release/stripReleaseDebugSymbols/out/lib") {
+        into "jni"
+    }
+
+    doLast {
+        // Also copy dependency AARs to outputs/aar for convenient consumption
+        copy {
+            from "${rootDir}/../node_modules/@react-native-async-storage/async-storage/android/build/outputs/aar/react-native-async-storage_async-storage-release.aar"
+            from "${rootDir}/../node_modules/react-native-safe-area-context/android/build/outputs/aar/react-native-safe-area-context-release.aar"
+            from "${rootDir}/../node_modules/react-native-screens/android/build/outputs/aar/react-native-screens-release.aar"
+            into "${rootDir}/outputs/aar"
+        }
+        // Also copy into app/build/outputs/aar
+        copy {
+            from "${rootDir}/outputs/aar"
+            into "${project.buildDir}/outputs/aar"
+        }
+        println("\n=======================================================")
+        println("✅ AAR generation completed successfully!")
+        println("Output directory: ${rootDir}/outputs/aar/")
+        file("${rootDir}/outputs/aar").listFiles().each { file ->
+            println(" - ${file.name} (${file.length()} bytes)")
+        }
+        println("=======================================================\n")
+    }
+}
+
