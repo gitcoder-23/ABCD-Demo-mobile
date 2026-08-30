@@ -1,5 +1,13 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StatusBar,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
 import { fetchTestDetail } from '../../app/redux/actions/testActions';
@@ -8,7 +16,9 @@ import { resetTestDetail } from '../../app/redux/slices/testSlice';
 const TestDetailScreen = ({ route, navigation }: any) => {
   const { testId } = route.params;
   const dispatch = useAppDispatch();
-  const { testDetail, isTestDetailLoading, testDetailError } = useAppSelector(state => state.test);
+  const { testDetail, isTestDetailLoading, testDetailError } = useAppSelector(
+    state => state.test,
+  );
 
   useEffect(() => {
     dispatch(fetchTestDetail(testId));
@@ -17,52 +27,58 @@ const TestDetailScreen = ({ route, navigation }: any) => {
     };
   }, [dispatch, testId]);
 
+  const renderHeader = (title: string) => (
+    <SafeAreaView style={styles.headerSafeArea} edges={['top']}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text style={styles.backBtnText}>{'‹ Back'}</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{title}</Text>
+        <View style={{ width: 60 }} />
+      </View>
+    </SafeAreaView>
+  );
+
   if (isTestDetailLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.backBtnText}>{'< Back'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Test Details</Text>
-          <View style={{ width: 60 }} />
-        </View>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+        {renderHeader('Test Details')}
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#B71234" />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (testDetailError || !testDetail) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.backBtnText}>{'< Back'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Test Details</Text>
-          <View style={{ width: 60 }} />
-        </View>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+        {renderHeader('Test Details')}
         <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{testDetailError || 'Test details not found.'}</Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={() => dispatch(fetchTestDetail(testId))}>
+          <Text style={styles.errorText}>
+            {testDetailError || 'Test details not found.'}
+          </Text>
+          <TouchableOpacity
+            style={styles.retryBtn}
+            onPress={() => dispatch(fetchTestDetail(testId))}
+          >
             <Text style={styles.retryText}>Retry</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Test Details</Text>
-        <View style={{ width: 60 }} />
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+      {renderHeader('Test Details')}
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
@@ -74,9 +90,9 @@ const TestDetailScreen = ({ route, navigation }: any) => {
               </View>
             )}
           </View>
-          
+
           <Text style={styles.testCode}>Code: {testDetail.testCode}</Text>
-          
+
           {testDetail.description && (
             <Text style={styles.description}>{testDetail.description}</Text>
           )}
@@ -87,7 +103,9 @@ const TestDetailScreen = ({ route, navigation }: any) => {
                 <Text style={styles.discountedPrice}>₹{testDetail.price}</Text>
                 <Text style={styles.mrp}>₹{testDetail.mrp}</Text>
                 <View style={styles.savingsTag}>
-                  <Text style={styles.savingsText}>{testDetail.savingsPercent}% OFF</Text>
+                  <Text style={styles.savingsText}>
+                    {testDetail.savingsPercent}% OFF
+                  </Text>
                 </View>
               </>
             ) : (
@@ -98,40 +116,46 @@ const TestDetailScreen = ({ route, navigation }: any) => {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Details</Text>
-          
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Category:</Text>
-            <Text style={styles.detailValue}>{testDetail.category}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Turn Around Time:</Text>
+            <Text style={styles.detailLabel}>Turnaround Time (TAT)</Text>
             <Text style={styles.detailValue}>{testDetail.tat}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Home Collection:</Text>
-            <Text style={styles.detailValue}>{testDetail.homeCollection ? 'Available' : 'Not Available'}</Text>
+            <Text style={styles.detailLabel}>Sample Type</Text>
+            <Text style={styles.detailValue}>{testDetail.sampleType}</Text>
           </View>
-          {testDetail.sampleType && (
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Home Collection</Text>
+            <Text style={styles.detailValue}>
+              {testDetail.homeCollection ? 'Available' : 'Not Available'}
+            </Text>
+          </View>
+          {testDetail.category && (
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Sample Type:</Text>
-              <Text style={styles.detailValue}>{testDetail.sampleType}</Text>
-            </View>
-          )}
-          {testDetail.method && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Method:</Text>
-              <Text style={styles.detailValue}>{testDetail.method}</Text>
+              <Text style={styles.detailLabel}>Category</Text>
+              <Text style={styles.detailValue}>{testDetail.category.name}</Text>
             </View>
           )}
         </View>
 
+        {testDetail.instructions && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            <Text style={styles.description}>{testDetail.instructions}</Text>
+          </View>
+        )}
+
         {testDetail.parameters && testDetail.parameters.length > 0 && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Parameters ({testDetail.parameters.length})</Text>
+            <Text style={styles.sectionTitle}>
+              Parameters Tested ({testDetail.parameters.length})
+            </Text>
             {testDetail.parameters.map((param, index) => (
-              <View key={index} style={styles.paramRow}>
-                <Text style={styles.paramName}>• {param.name}</Text>
-                {param.unit && <Text style={styles.paramUnit}>{param.unit}</Text>}
+              <View key={param.id || index} style={styles.paramRow}>
+                <Text style={styles.paramName}>{param.name}</Text>
+                {param.unit && (
+                  <Text style={styles.paramUnit}>{param.unit}</Text>
+                )}
               </View>
             ))}
           </View>
@@ -139,11 +163,14 @@ const TestDetailScreen = ({ route, navigation }: any) => {
       </ScrollView>
 
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.addToCartBtn}>
-          <Text style={styles.addToCartText}>Add to Cart</Text>
+        <TouchableOpacity
+          style={styles.addToCartBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.addToCartText}>Back to Catalog</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -152,27 +179,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
+  headerSafeArea: {
+    backgroundColor: '#B71234',
+  },
   header: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    paddingHorizontal: 16,
+    backgroundColor: '#B71234',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   backBtn: {
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
   },
   backBtnText: {
-    color: '#B71234',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 17,
     fontWeight: '600',
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#333333',
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
   },
   centerContainer: {
     flex: 1,
@@ -182,7 +218,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 100, // Space for bottom bar
+    paddingBottom: 100,
   },
   card: {
     backgroundColor: '#FFFFFF',

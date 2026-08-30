@@ -1,5 +1,15 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ListRenderItemInfo, BackHandler } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  ListRenderItemInfo,
+  BackHandler,
+  StatusBar,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
 import { fetchTestCatalog } from '../../app/redux/actions/testActions';
@@ -7,7 +17,8 @@ import { TestItemModel } from '../../app/redux/models/testModel';
 
 const TestCatalogScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
-  const { tests, isLoading, isError, errorMessage, currentPage, totalPages } = useAppSelector(state => state.test);
+  const { tests, isLoading, isError, errorMessage, currentPage, totalPages } =
+    useAppSelector(state => state.test);
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -18,46 +29,52 @@ const TestCatalogScreen = ({ navigation }: any) => {
   };
 
   useEffect(() => {
-    dispatch(fetchTestCatalog({
-      limit: 20,
-      page: 1,
-      search: '',
-      maxPrice: '',
-      minPrice: '',
-      categoryId: '',
-    }));
-  }, [dispatch]);
-
-  const handleLoadMore = () => {
-    if (!isLoading && currentPage < totalPages) {
-      dispatch(fetchTestCatalog({
+    dispatch(
+      fetchTestCatalog({
         limit: 20,
-        page: currentPage + 1,
+        page: 1,
         search: '',
         maxPrice: '',
         minPrice: '',
         categoryId: '',
-      }));
+      }),
+    );
+  }, [dispatch]);
+
+  const handleLoadMore = () => {
+    if (!isLoading && currentPage < totalPages) {
+      dispatch(
+        fetchTestCatalog({
+          limit: 20,
+          page: currentPage + 1,
+          search: '',
+          maxPrice: '',
+          minPrice: '',
+          categoryId: '',
+        }),
+      );
     }
   };
 
   const renderItem = ({ item }: ListRenderItemInfo<TestItemModel>) => (
-    <TouchableOpacity 
-      style={styles.card} 
+    <TouchableOpacity
+      style={styles.card}
       activeOpacity={0.8}
       onPress={() => navigation.navigate('TestDetail', { testId: item.id })}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.testName} numberOfLines={2}>{item.name}</Text>
+        <Text style={styles.testName} numberOfLines={2}>
+          {item.name}
+        </Text>
         {item.fastingRequired && (
           <View style={styles.tag}>
             <Text style={styles.tagText}>Fasting</Text>
           </View>
         )}
       </View>
-      
+
       <Text style={styles.testCode}>Code: {item.testCode}</Text>
-      
+
       <View style={styles.priceContainer}>
         {item.savingsPercent > 0 ? (
           <>
@@ -82,39 +99,68 @@ const TestCatalogScreen = ({ navigation }: any) => {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-          <Text style={styles.backBtnText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Test Catalog</Text>
-        <View style={{ width: 60 }} />
-      </View>
-
-      {isError && !tests.length ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={() => dispatch(fetchTestCatalog({ limit: 20, page: 1, search: '', maxPrice: '', minPrice: '', categoryId: '' }))}>
-            <Text style={styles.retryText}>Retry</Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+      <SafeAreaView style={styles.headerSafeArea} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} onPress={handleBack} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.backBtnText}>{'‹ Back'}</Text>
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>All Tests</Text>
+          <View style={{ width: 60 }} />
         </View>
-      ) : (
-        <FlatList
-          data={tests}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContainer}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={isLoading ? <ActivityIndicator size="large" color="#B71234" style={{ margin: 20 }} /> : undefined}
-          ListEmptyComponent={!isLoading ? (
-            <View style={styles.centerContainer}>
-              <Text style={styles.emptyText}>No tests available.</Text>
-            </View>
-          ) : undefined}
-        />
-      )}
-    </SafeAreaView>
+      </SafeAreaView>
+
+      <View style={styles.body}>
+        {isError && !tests.length ? (
+          <View style={styles.centerContainer}>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+            <TouchableOpacity
+              style={styles.retryBtn}
+              onPress={() =>
+                dispatch(
+                  fetchTestCatalog({
+                    limit: 20,
+                    page: 1,
+                    search: '',
+                    maxPrice: '',
+                    minPrice: '',
+                    categoryId: '',
+                  }),
+                )
+              }
+            >
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={tests}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContainer}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#B71234"
+                  style={{ margin: 20 }}
+                />
+              ) : undefined
+            }
+            ListEmptyComponent={
+              !isLoading ? (
+                <View style={styles.centerContainer}>
+                  <Text style={styles.emptyText}>No tests available.</Text>
+                </View>
+              ) : undefined
+            }
+          />
+        )}
+      </View>
+    </View>
   );
 };
 
@@ -123,27 +169,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
+  headerSafeArea: {
+    backgroundColor: '#B71234',
+  },
   header: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    paddingHorizontal: 16,
+    backgroundColor: '#B71234',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   backBtn: {
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
   },
   backBtnText: {
-    color: '#B71234',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontSize: 17,
     fontWeight: '600',
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#333333',
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  body: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   centerContainer: {
     flex: 1,
