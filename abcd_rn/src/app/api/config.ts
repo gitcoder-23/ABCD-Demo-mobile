@@ -3,7 +3,7 @@ export const baseUrl = 'https://api.idemshealth.dtftsolutions.com/api/v1/app';
 // Auth Endpoints
 export const registerApi = '/auth/register';
 export const loginApi = '/auth/login';
-export const logoutApi = '/auth/logout';
+export const logoutApi = '/logout';
 export const changePasswordApi = '/auth/change-password';
 export const refreshTokenApi = '/auth/refresh';
 export const verifyRegisterApi = '/auth/verify-register';

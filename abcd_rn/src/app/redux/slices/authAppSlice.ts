@@ -1,6 +1,7 @@
 import {
   LoginAction,
   RefreshTokenAction,
+  LogoutAction,
   RegisterAction,
   VerifyRegisterAction,
   ResendRegisterOtpAction,
@@ -18,6 +19,9 @@ export interface AuthAppState {
   refreshToken: string;
   errorMessage: string | undefined;
   isError: boolean;
+
+  // Logout
+  isLogoutLoading: boolean;
 
   // Register
   isRegisterLoading: boolean;
@@ -48,6 +52,9 @@ const initialState: AuthAppState = {
   refreshToken: '',
   errorMessage: undefined,
   isError: false,
+
+  // Logout
+  isLogoutLoading: false,
 
   // Register
   isRegisterLoading: false,
@@ -154,6 +161,27 @@ const authAppSlice = createSlice({
       state.accessToken = '';
       state.refreshToken = '';
     });
+
+    // Logout
+    builder.addCase(LogoutAction.pending, state => {
+      state.isLogoutLoading = true;
+    });
+    builder.addCase(LogoutAction.fulfilled, state => {
+      state.isLogoutLoading = false;
+      state.accessToken = '';
+      state.refreshToken = '';
+      state.loginResponse = null;
+      state.errorMessage = 'Logged out successfully';
+      state.isError = false;
+    });
+    builder.addCase(LogoutAction.rejected, state => {
+      state.isLogoutLoading = false;
+      state.accessToken = '';
+      state.refreshToken = '';
+      state.loginResponse = null;
+      state.errorMessage = 'Logged out';
+    });
+
     // Refresh Token
     builder.addCase(RefreshTokenAction.fulfilled, (state, action) => {
       const responseData = action.payload;
@@ -197,6 +225,7 @@ const authAppSlice = createSlice({
       state.isVerifyLoading = false;
       state.verifyError = action.payload?.message || 'Verification failed';
     });
+
     // Resend OTP
     builder.addCase(ResendRegisterOtpAction.pending, state => {
       state.isResendOtpLoading = true;
@@ -210,6 +239,7 @@ const authAppSlice = createSlice({
       state.isResendOtpLoading = false;
       state.resendOtpError = action.payload?.message || 'Failed to resend OTP';
     });
+
     // Forgot Password
     builder.addCase(ForgotPasswordAction.pending, state => {
       state.isForgotPasswordLoading = true;
@@ -224,6 +254,7 @@ const authAppSlice = createSlice({
       state.forgotPasswordError =
         action.payload?.message || 'Failed to send reset link';
     });
+
     // Reset Password
     builder.addCase(ResetPasswordAction.pending, state => {
       state.isResetPasswordLoading = true;

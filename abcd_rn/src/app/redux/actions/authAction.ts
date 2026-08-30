@@ -3,6 +3,8 @@ import {
   AuthLoginResponseModel,
   LoginBodyActionType,
   RefreshResponseModel,
+  LogoutBodyActionType,
+  LogoutResponseModel,
   RegisterBodyActionType,
   RegisterResponseModel,
   VerifyRegisterBodyActionType,
@@ -62,20 +64,18 @@ export const RefreshTokenAction = createAsyncThunk<
   }
 });
 
-export const LogoutAction = createAsyncThunk(
-  'auth/logout',
-  async (
-    { allDevices = false }: { allDevices: boolean },
-    { rejectWithValue },
-  ) => {
-    try {
-      const response = await rootApi.post(logoutApi, { allDevices });
-      return response.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data);
-    }
-  },
-);
+export const LogoutAction = createAsyncThunk<
+  LogoutResponseModel,
+  LogoutBodyActionType | undefined,
+  { rejectValue: any }
+>('auth/logout', async (payload = { allDevices: false }, { rejectWithValue }) => {
+  try {
+    const response = await rootApi.post<LogoutResponseModel>(logoutApi, payload);
+    return response.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data);
+  }
+});
 
 export const RegisterAction = createAsyncThunk<
   RegisterResponseModel,

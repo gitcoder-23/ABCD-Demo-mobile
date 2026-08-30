@@ -28,6 +28,16 @@ export interface RefreshResponseModel {
   } | null;
 }
 
+export interface LogoutBodyActionType {
+  allDevices?: boolean;
+}
+
+export interface LogoutResponseModel {
+  success?: boolean;
+  message?: string;
+  data?: any;
+}
+
 // {
 //   "success": false,
 //   "statusCode": 400,
