@@ -12,9 +12,23 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "openNativeTests") {
-                val intent = Intent(this, com.abcd_rn.MainActivity::class.java)
-                startActivity(intent)
-                result.success(true)
+                try {
+                    val accessToken = call.argument<String>("accessToken")
+                    val refreshToken = call.argument<String>("refreshToken")
+                    val userData = call.argument<String>("userData")
+                    val targetScreen = call.argument<String>("targetScreen") ?: "TestCatalog"
+
+                    val intent = Intent(this, com.abcd_rn.MainActivity::class.java).apply {
+                        putExtra("accessToken", accessToken)
+                        putExtra("refreshToken", refreshToken)
+                        putExtra("userData", userData)
+                        putExtra("targetScreen", targetScreen)
+                    }
+                    startActivity(intent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("ERROR", "Failed to start native activity: ${e.message}", null)
+                }
             } else {
                 result.notImplemented()
             }

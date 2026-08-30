@@ -462,6 +462,110 @@ flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 ```
 
+---
+
+## 6. Single Sign-On (SSO) Token Sharing: Flutter to React Native
+
+To ensure the user logs in **only once** in Flutter and gets seamless authenticated access to React Native modules (such as Test Catalog), the auth tokens are shared securely via Android Intents and Native Modules.
+
+### Architecture Overview
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Flutter as Flutter App (AuthController)
+    participant HostNative as Flutter MainActivity (Android)
+    participant RNNative as React Native MainActivity (AAR)
+    participant RNBridge as NativeBridgeModule
+    participant RNRedux as Redux Store (authAppSlice)
+    participant RNScreen as TestCatalogScreen
+
+    User->>Flutter: Logs in with credentials
+    Flutter->>Flutter: Stores JWT accessToken & refreshToken
+    User->>Flutter: Taps "All Tests (Native)"
+    Flutter->>HostNative: MethodChannel.invokeMethod('openNativeTests', {accessToken, ...})
+    HostNative->>RNNative: Intent.putExtra('accessToken', token)
+    RNNative->>RNBridge: Passes extras via getLaunchOptions() / NativeBridge
+    RNBridge->>RNRedux: Dispatches setSessionFromNative({accessToken, ...})
+    RNRedux->>RNScreen: Directly renders Test Catalog with authenticated API headers
+```
+
+### 1. Flutter Side (`home.dart`)
+```dart
+final AuthController authController = Get.find<AuthController>();
+await platform.invokeMethod('openNativeTests', {
+  'accessToken': authController.token.value,
+  'refreshToken': authController.refreshToken.value,
+  'userData': jsonEncode(authController.user),
+  'targetScreen': 'TestCatalog',
+});
+```
+
+### 2. Flutter Host Native Bridge (`MainActivity.kt`)
+```kotlin
+val accessToken = call.argument<String>("accessToken")
+val refreshToken = call.argument<String>("refreshToken")
+val userData = call.argument<String>("userData")
+val targetScreen = call.argument<String>("targetScreen") ?: "TestCatalog"
+
+val intent = Intent(this, com.abcd_rn.MainActivity::class.java).apply {
+    putExtra("accessToken", accessToken)
+    putExtra("refreshToken", refreshToken)
+    putExtra("userData", userData)
+    putExtra("targetScreen", targetScreen)
+}
+startActivity(intent)
+```
+
+### 3. React Native Native Bridge (`NativeBridgeModule.kt`)
+Exposes `getAuthData()` and `onAuthDataReceived` event emitter:
+```kotlin
+@ReactMethod
+fun getAuthData(promise: Promise) {
+    val activity = reactContext.currentActivity
+    val extras: Bundle? = activity?.intent?.extras
+    val map = Arguments.createMap()
+    if (extras != null) {
+        for (key in extras.keySet()) {
+            map.putString(key, extras.getString(key))
+        }
+    }
+    promise.resolve(map)
+}
+```
+
+### 4. React Native State Ingestion (`App.tsx` & Redux)
+```typescript
+dispatch(
+  setSessionFromNative({
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken || '',
+    userData: parsedUser,
+  }),
+);
+```
+
+---
+
+## 7. CLI Commands: Building and Running Flutter App
+
+```bash
+# 1. Navigate to Flutter root
+cd abcd_fl
+
+# 2. Fetch Flutter packages
+flutter pub get
+
+# 3. Clean any old build artifacts
+flutter clean
+
+# 4. Build the Debug APK
+flutter build apk --debug
+
+# 5. Install APK directly onto connected device/emulator
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
 ### Run with Live Logs
 ```bash
 flutter run
@@ -469,7 +573,7 @@ flutter run
 
 ---
 
-## 7. Troubleshooting & Gotchas
+## 8. Troubleshooting & Gotchas
 
 ### Issue 1: `2 files found with path 'lib/arm64-v8a/lib*.so'`
 - **Cause**: Both `react-android` maven artifact and the `.AAR` include common C++ shared libraries (`libc++_shared.so`, `libjsi.so`, etc.).
@@ -506,3 +610,4 @@ flutter run
       into "jni"
   }
   ```
+

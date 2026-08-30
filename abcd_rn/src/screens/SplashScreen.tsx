@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-
 import { useSelector } from 'react-redux';
 import { RootState } from '../app/redux/store';
 
@@ -9,6 +8,11 @@ const SplashScreen = ({ navigation }: any) => {
   const { accessToken } = useSelector((state: RootState) => state.authApp);
 
   useEffect(() => {
+    if (accessToken) {
+      navigation.replace('TestCatalog');
+      return;
+    }
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1500,
@@ -17,7 +21,7 @@ const SplashScreen = ({ navigation }: any) => {
 
     const timer = setTimeout(() => {
       if (accessToken) {
-        navigation.replace('Home');
+        navigation.replace('TestCatalog');
       } else {
         navigation.replace('Login');
       }

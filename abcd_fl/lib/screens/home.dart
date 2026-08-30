@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,7 +11,13 @@ class HomeScreen extends StatelessWidget {
 
   Future<void> _openNativeTests(BuildContext context) async {
     try {
-      await platform.invokeMethod('openNativeTests');
+      final AuthController authController = Get.find<AuthController>();
+      await platform.invokeMethod('openNativeTests', {
+        'accessToken': authController.token.value,
+        'refreshToken': authController.refreshToken.value,
+        'userData': jsonEncode(authController.user),
+        'targetScreen': 'TestCatalog',
+      });
     } on PlatformException catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

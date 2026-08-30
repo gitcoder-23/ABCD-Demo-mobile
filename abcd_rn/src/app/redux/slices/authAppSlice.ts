@@ -95,6 +95,32 @@ const authAppSlice = createSlice({
       state.errorMessage = 'Logout success';
       state.isLoginLoading = false;
     },
+    setSessionFromNative: (
+      state,
+      action: PayloadAction<{
+        accessToken: string;
+        refreshToken?: string;
+        userData?: any;
+      }>,
+    ) => {
+      state.accessToken = action.payload.accessToken;
+      if (action.payload.refreshToken) {
+        state.refreshToken = action.payload.refreshToken;
+      }
+      if (action.payload.userData) {
+        state.loginResponse = {
+          success: true,
+          data: {
+            accessToken: action.payload.accessToken,
+            refreshToken: action.payload.refreshToken || '',
+            ...action.payload.userData,
+          },
+        };
+      }
+      state.isLoginLoading = false;
+      state.isError = false;
+      state.errorMessage = 'Logged in via SSO';
+    },
   },
   extraReducers: function (builder) {
     // Login - pending
@@ -215,6 +241,7 @@ const authAppSlice = createSlice({
   },
 });
 
-export const { setLogin, setLogout, updateTokens } = authAppSlice.actions;
+export const { setLogin, setLogout, updateTokens, setSessionFromNative } =
+  authAppSlice.actions;
 
 export default authAppSlice.reducer;

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ListRenderItemInfo } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, ListRenderItemInfo, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../../app/redux/hooks';
 import { fetchTestCatalog } from '../../app/redux/actions/testActions';
@@ -8,6 +8,14 @@ import { TestItemModel } from '../../app/redux/models/testModel';
 const TestCatalogScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
   const { tests, isLoading, isError, errorMessage, currentPage, totalPages } = useAppSelector(state => state.test);
+
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      BackHandler.exitApp();
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchTestCatalog({
@@ -76,7 +84,7 @@ const TestCatalogScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
           <Text style={styles.backBtnText}>{'< Back'}</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Test Catalog</Text>
