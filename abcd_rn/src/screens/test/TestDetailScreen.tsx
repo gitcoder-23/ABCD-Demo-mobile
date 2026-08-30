@@ -45,10 +45,10 @@ const TestDetailScreen = ({ route, navigation }: any) => {
 
   if (isTestDetailLoading) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+      <View style={[styles.container, { backgroundColor: '#B71234' }]}>
+        <StatusBar barStyle="light-content" />
         {renderHeader('Test Details')}
-        <View style={styles.centerContainer}>
+        <View style={[styles.centerContainer, { backgroundColor: '#F8F9FA' }]}>
           <ActivityIndicator size="large" color="#B71234" />
         </View>
       </View>
@@ -57,10 +57,10 @@ const TestDetailScreen = ({ route, navigation }: any) => {
 
   if (testDetailError || !testDetail) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+      <View style={[styles.container, { backgroundColor: '#B71234' }]}>
+        <StatusBar barStyle="light-content" />
         {renderHeader('Test Details')}
-        <View style={styles.centerContainer}>
+        <View style={[styles.centerContainer, { backgroundColor: '#F8F9FA' }]}>
           <Text style={styles.errorText}>
             {testDetailError || 'Test details not found.'}
           </Text>
@@ -75,100 +75,108 @@ const TestDetailScreen = ({ route, navigation }: any) => {
     );
   }
 
+  const categoryName =
+    typeof testDetail.category === 'object'
+      ? (testDetail.category as any)?.name
+      : testDetail.category;
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+    <View style={[styles.container, { backgroundColor: '#B71234' }]}>
+      <StatusBar barStyle="light-content" />
       {renderHeader('Test Details')}
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.testName}>{testDetail.name}</Text>
-            {testDetail.fastingRequired && (
-              <View style={styles.tag}>
-                <Text style={styles.tagText}>Fasting</Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.testCode}>Code: {testDetail.testCode}</Text>
-
-          {testDetail.description && (
-            <Text style={styles.description}>{testDetail.description}</Text>
-          )}
-
-          <View style={styles.priceContainer}>
-            {testDetail.savingsPercent > 0 ? (
-              <>
-                <Text style={styles.discountedPrice}>₹{testDetail.price}</Text>
-                <Text style={styles.mrp}>₹{testDetail.mrp}</Text>
-                <View style={styles.savingsTag}>
-                  <Text style={styles.savingsText}>
-                    {testDetail.savingsPercent}% OFF
-                  </Text>
+      <View style={styles.contentContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.testName}>{testDetail.name}</Text>
+              {testDetail.fastingRequired && (
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>Fasting</Text>
                 </View>
-              </>
-            ) : (
-              <Text style={styles.discountedPrice}>₹{testDetail.price}</Text>
-            )}
-          </View>
-        </View>
+              )}
+            </View>
 
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Details</Text>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Turnaround Time (TAT)</Text>
-            <Text style={styles.detailValue}>{testDetail.tat}</Text>
+            <Text style={styles.testCode}>Code: {testDetail.testCode}</Text>
+
+            {testDetail.description && (
+              <Text style={styles.description}>{testDetail.description}</Text>
+            )}
+
+            <View style={styles.priceContainer}>
+              {testDetail.savingsPercent > 0 ? (
+                <>
+                  <Text style={styles.discountedPrice}>
+                    ₹{testDetail.price}
+                  </Text>
+                  <Text style={styles.mrp}>₹{testDetail.mrp}</Text>
+                  <View style={styles.savingsTag}>
+                    <Text style={styles.savingsText}>
+                      {testDetail.savingsPercent}% OFF
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <Text style={styles.discountedPrice}>₹{testDetail.price}</Text>
+              )}
+            </View>
           </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Sample Type</Text>
-            <Text style={styles.detailValue}>{testDetail.sampleType}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Home Collection</Text>
-            <Text style={styles.detailValue}>
-              {testDetail.homeCollection ? 'Available' : 'Not Available'}
-            </Text>
-          </View>
-          {testDetail.category && (
+
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Details</Text>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Category</Text>
-              <Text style={styles.detailValue}>{testDetail.category.name}</Text>
+              <Text style={styles.detailLabel}>Turnaround Time (TAT)</Text>
+              <Text style={styles.detailValue}>{testDetail.tat}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Sample Type</Text>
+              <Text style={styles.detailValue}>{testDetail.sampleType}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Home Collection</Text>
+              <Text style={styles.detailValue}>
+                {testDetail.homeCollection ? 'Available' : 'Not Available'}
+              </Text>
+            </View>
+            {categoryName ? (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Category</Text>
+                <Text style={styles.detailValue}>{categoryName}</Text>
+              </View>
+            ) : null}
+            {testDetail.method ? (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Method</Text>
+                <Text style={styles.detailValue}>{testDetail.method}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          {testDetail.parameters && testDetail.parameters.length > 0 && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>
+                Parameters Tested ({testDetail.parameters.length})
+              </Text>
+              {testDetail.parameters.map((param, index) => (
+                <View key={`${param.name}-${index}`} style={styles.paramRow}>
+                  <Text style={styles.paramName}>{param.name}</Text>
+                  {param.unit && (
+                    <Text style={styles.paramUnit}>{param.unit}</Text>
+                  )}
+                </View>
+              ))}
             </View>
           )}
+        </ScrollView>
+
+        <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={styles.addToCartBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.addToCartText}>Back to Catalog</Text>
+          </TouchableOpacity>
         </View>
-
-        {testDetail.instructions && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Instructions</Text>
-            <Text style={styles.description}>{testDetail.instructions}</Text>
-          </View>
-        )}
-
-        {testDetail.parameters && testDetail.parameters.length > 0 && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Parameters Tested ({testDetail.parameters.length})
-            </Text>
-            {testDetail.parameters.map((param, index) => (
-              <View key={param.id || index} style={styles.paramRow}>
-                <Text style={styles.paramName}>{param.name}</Text>
-                {param.unit && (
-                  <Text style={styles.paramUnit}>{param.unit}</Text>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-      </ScrollView>
-
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.addToCartBtn}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.addToCartText}>Back to Catalog</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -176,6 +184,9 @@ const TestDetailScreen = ({ route, navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  contentContainer: {
     flex: 1,
     backgroundColor: '#F8F9FA',
   },

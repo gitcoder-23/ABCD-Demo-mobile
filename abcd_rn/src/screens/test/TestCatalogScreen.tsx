@@ -99,11 +99,15 @@ const TestCatalogScreen = ({ navigation }: any) => {
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#B71234" />
+    <View style={[styles.container, { backgroundColor: '#B71234' }]}>
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.headerSafeArea} edges={['top']}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={handleBack} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={handleBack}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text style={styles.backBtnText}>{'‹ Back'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>All Tests</Text>
@@ -167,7 +171,6 @@ const TestCatalogScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
   },
   headerSafeArea: {
     backgroundColor: '#B71234',
