@@ -27,11 +27,53 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text('Are you sure you want to log out from your account?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF666666))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(ctx).pop();
+                final AuthController authController = Get.find<AuthController>();
+                await authController.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB71234),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AuthController authController = Get.find<AuthController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home', style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () => _showLogoutDialog(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -54,8 +96,8 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
                 child: Column(
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Welcome Back',
                       style: TextStyle(
                         fontSize: 28,
@@ -63,19 +105,22 @@ class HomeScreen extends StatelessWidget {
                         color: Color(0xFF333333),
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'What would you like to do today?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF666666),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      final email = authController.user['email'] ?? '';
+                      return Text(
+                        email.isNotEmpty ? '$email' : 'What would you like to do today?',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF666666),
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    }),
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/about');
@@ -95,7 +140,7 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               OutlinedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/contact');
@@ -114,7 +159,7 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               OutlinedButton(
                 onPressed: () => _openNativeTests(context),
                 style: OutlinedButton.styleFrom(
@@ -131,6 +176,22 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
               ),
+              const SizedBox(height: 14),
+              TextButton.icon(
+                onPressed: () => _showLogoutDialog(context),
+                icon: const Icon(Icons.logout, color: Color(0xFFB71234), size: 20),
+                label: const Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: Color(0xFFB71234),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ],
           ),
         ),
@@ -138,4 +199,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

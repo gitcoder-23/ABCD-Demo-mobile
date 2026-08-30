@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -13,6 +14,8 @@ class AuthController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
   var successMessage = ''.obs;
+
+  static const _platform = MethodChannel('com.example.abcd_fl/native_tests');
 
   @override
   void onInit() {
@@ -64,17 +67,49 @@ class AuthController extends GetxController {
     await prefs.setString('token', newToken);
   }
 
-  Future<void> logout() async {
-    token.value = '';
-    refreshToken.value = '';
-    user.value = {};
-    isAuthenticated.value = false;
+  Future<void> logout({bool allDevices = false}) async {
+    try {
+      isLoading.value = true;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('refreshToken');
+      // 1. Call Backend Logout API if token exists
+      if (token.value.isNotEmpty) {
+        try {
+          await DioClient().dio.post(
+            ApiConfig.logout,
+            data: {'allDevices': allDevices},
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer ${token.value}',
+              },
+            ),
+          );
+        } catch (e) {
+          print('Logout API error (proceeding with local cleanup): $e');
+        }
+      }
+    } finally {
+      // 2. Clear Flutter State & Local Storage
+      token.value = '';
+      refreshToken.value = '';
+      user.value = {};
+      isAuthenticated.value = false;
+      isLoading.value = false;
 
-    Get.offAllNamed('/login');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      await prefs.remove('refreshToken');
+      await prefs.remove('userData');
+
+      // 3. Clear React Native / Android Native session
+      try {
+        await _platform.invokeMethod('clearNativeSession');
+      } catch (e) {
+        print('Native session clear error: $e');
+      }
+
+      // 4. Navigate back to Login Screen
+      Get.offAllNamed('/login');
+    }
   }
 
   // --- API Methods ---
